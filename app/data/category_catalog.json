@@ -1,0 +1,47 @@
+{
+  "_info": "Daftar kategori aktif. 'key' HARUS sama dengan label keluaran model ML. 'icon' = nama Material Icon di Flutter (Icons.<icon>). Ubah file ini lalu restart server untuk menambah/mengubah kategori.",
+  "categories": [
+    {
+      "key": "Makanan",
+      "display_name": "Makanan",
+      "description": "Makanan, camilan, dan bahan pangan",
+      "icon": "restaurant",
+      "color": "#2563EB"
+    },
+    {
+      "key": "Minuman",
+      "display_name": "Minuman",
+      "description": "Minuman kemasan, kopi, teh, susu, dan air mineral",
+      "icon": "local_cafe",
+      "color": "#14B8A6"
+    },
+    {
+      "key": "Kebutuhan_Rumah_Tangga",
+      "display_name": "Kebutuhan Rumah Tangga",
+      "description": "Perlengkapan kebersihan dan kebutuhan rumah sehari-hari",
+      "icon": "home",
+      "color": "#60A5FA"
+    },
+    {
+      "key": "Perawatan_Diri",
+      "display_name": "Perawatan Diri",
+      "description": "Produk kebersihan badan, kosmetik, dan perawatan diri",
+      "icon": "spa",
+      "color": "#A855F7"
+    },
+    {
+      "key": "Kesehatan",
+      "display_name": "Kesehatan",
+      "description": "Obat, vitamin, dan kebutuhan kesehatan",
+      "icon": "medical_services",
+      "color": "#EF4444"
+    },
+    {
+      "key": "Lainnya",
+      "display_name": "Lainnya",
+      "description": "Pengeluaran di luar kategori utama",
+      "icon": "more_horiz",
+      "color": "#94A3B8"
+    }
+  ]
+}

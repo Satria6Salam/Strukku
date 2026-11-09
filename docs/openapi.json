@@ -1,0 +1,3225 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "STRUKKU Backend API",
+  "description": "Backend STRUKKU: autentikasi, pindai struk (OCR), klasifikasi kategori barang, pencatatan transaksi, dan analitik pengeluaran bulanan.\n\nKlik **Authorize** lalu login (username = email) untuk mencoba endpoint yang butuh token.",
+  "version": "2.0.0"
+ },
+ "paths": {
+  "/api/v1/health": {
+   "get": {
+    "tags": [
+     "Health"
+    ],
+    "summary": "Health",
+    "description": "Status server, database, model ML, dan OCR. Cek ini dulu bila ada masalah.",
+    "operationId": "health_api_v1_health_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/auth/register": {
+   "post": {
+    "tags": [
+     "Auth & Profil"
+    ],
+    "summary": "Register",
+    "description": "Buat akun baru. Langsung mengembalikan token sehingga pengguna otomatis login.",
+    "operationId": "register_api_v1_auth_register_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RegisterRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/auth/login": {
+   "post": {
+    "tags": [
+     "Auth & Profil"
+    ],
+    "summary": "Login",
+    "description": "Login dengan JSON `{email, password}`. Dipakai aplikasi Flutter.",
+    "operationId": "login_api_v1_auth_login_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LoginRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/auth/token": {
+   "post": {
+    "tags": [
+     "Auth & Profil"
+    ],
+    "summary": "Login (form, untuk Swagger)",
+    "description": "Dipakai tombol **Authorize** di /docs. Isi *username* dengan email.",
+    "operationId": "login_form_api_v1_auth_token_post",
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_login_form_api_v1_auth_token_post"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/auth/me": {
+   "get": {
+    "tags": [
+     "Auth & Profil"
+    ],
+    "summary": "Me",
+    "operationId": "me_api_v1_auth_me_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UserOut"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ]
+   }
+  },
+  "/api/v1/users/me": {
+   "patch": {
+    "tags": [
+     "Auth & Profil"
+    ],
+    "summary": "Update Me",
+    "operationId": "update_me_api_v1_users_me_patch",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UserUpdate"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UserOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ]
+   }
+  },
+  "/api/v1/users/me/password": {
+   "post": {
+    "tags": [
+     "Auth & Profil"
+    ],
+    "summary": "Change Password",
+    "operationId": "change_password_api_v1_users_me_password_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PasswordChange"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MessageOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ]
+   }
+  },
+  "/api/v1/categories": {
+   "get": {
+    "tags": [
+     "Kategori"
+    ],
+    "summary": "List Categories",
+    "description": "Kategori aktif untuk dropdown di layar koreksi (urut sesuai katalog).",
+    "operationId": "list_categories_api_v1_categories_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/CategoryOut-Output"
+         },
+         "type": "array",
+         "title": "Response List Categories Api V1 Categories Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/scans": {
+   "post": {
+    "tags": [
+     "Pindai & Klasifikasi"
+    ],
+    "summary": "Scan Receipt",
+    "description": "Pindai foto struk: OCR → parsing → prediksi kategori per barang.\n\nData **belum** disimpan. Tampilkan hasilnya di layar Koreksi & Validasi,\nlalu kirim ke `POST /receipts` beserta `scan_id`.",
+    "operationId": "scan_receipt_api_v1_scans_post",
+    "requestBody": {
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/Body_scan_receipt_api_v1_scans_post"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ScanOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ]
+   }
+  },
+  "/api/v1/scans/{scan_id}/image": {
+   "get": {
+    "tags": [
+     "Pindai & Klasifikasi"
+    ],
+    "summary": "Scan Image",
+    "description": "Gambar hasil scan (untuk tombol \"Lihat struk penuh\" sebelum disimpan).",
+    "operationId": "scan_image_api_v1_scans__scan_id__image_get",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "scan_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Scan Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "image/jpeg": {}
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/classify": {
+   "post": {
+    "tags": [
+     "Pindai & Klasifikasi"
+    ],
+    "summary": "Classify Items",
+    "description": "Prediksi kategori untuk nama barang yang diketik manual.",
+    "operationId": "classify_items_api_v1_classify_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ClassifyRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/ClassifyItemOut-Output"
+         },
+         "type": "array",
+         "title": "Response Classify Items Api V1 Classify Post"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ]
+   }
+  },
+  "/api/v1/receipts": {
+   "post": {
+    "tags": [
+     "Struk / Transaksi"
+    ],
+    "summary": "Create Receipt",
+    "description": "Simpan struk setelah divalidasi pengguna (tombol **Save Data**).",
+    "operationId": "create_receipt_api_v1_receipts_post",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReceiptCreate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ReceiptOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "tags": [
+     "Struk / Transaksi"
+    ],
+    "summary": "List Receipts",
+    "description": "Riwayat struk terbaru lebih dulu, dengan filter & paginasi.",
+    "operationId": "list_receipts_api_v1_receipts_get",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "month",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Filter bulan YYYY-MM, mis. 2026-10",
+       "examples": [
+        "2026-10"
+       ],
+       "title": "Month"
+      },
+      "description": "Filter bulan YYYY-MM, mis. 2026-10"
+     },
+     {
+      "name": "date_from",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "date"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Tanggal awal (inklusif)",
+       "title": "Date From"
+      },
+      "description": "Tanggal awal (inklusif)"
+     },
+     {
+      "name": "date_to",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "date"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Tanggal akhir (inklusif)",
+       "title": "Date To"
+      },
+      "description": "Tanggal akhir (inklusif)"
+     },
+     {
+      "name": "category_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Struk yang memuat barang kategori ini",
+       "title": "Category Id"
+      },
+      "description": "Struk yang memuat barang kategori ini"
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 100
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Cari nama toko / nama barang",
+       "title": "Q"
+      },
+      "description": "Cari nama toko / nama barang"
+     },
+     {
+      "name": "page",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "default": 1,
+       "title": "Page"
+      }
+     },
+     {
+      "name": "page_size",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 100,
+       "minimum": 1,
+       "default": 20,
+       "title": "Page Size"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Page_ReceiptSummaryOut_"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/receipts/{receipt_id}": {
+   "get": {
+    "tags": [
+     "Struk / Transaksi"
+    ],
+    "summary": "Get Receipt",
+    "operationId": "get_receipt_api_v1_receipts__receipt_id__get",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "receipt_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Receipt Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ReceiptOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "put": {
+    "tags": [
+     "Struk / Transaksi"
+    ],
+    "summary": "Update Receipt",
+    "description": "Ganti seluruh isi struk (header + daftar barang).",
+    "operationId": "update_receipt_api_v1_receipts__receipt_id__put",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "receipt_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Receipt Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReceiptUpdate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ReceiptOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "tags": [
+     "Struk / Transaksi"
+    ],
+    "summary": "Delete Receipt",
+    "operationId": "delete_receipt_api_v1_receipts__receipt_id__delete",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "receipt_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Receipt Id"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Successful Response"
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/receipts/{receipt_id}/items/{item_id}": {
+   "patch": {
+    "tags": [
+     "Struk / Transaksi"
+    ],
+    "summary": "Update Receipt Item",
+    "description": "Ubah satu barang, mis. koreksi kategori setelah struk tersimpan.",
+    "operationId": "update_receipt_item_api_v1_receipts__receipt_id__items__item_id__patch",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "receipt_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Receipt Id"
+      }
+     },
+     {
+      "name": "item_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Item Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReceiptItemUpdate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ReceiptOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/receipts/{receipt_id}/image": {
+   "get": {
+    "tags": [
+     "Struk / Transaksi"
+    ],
+    "summary": "Get Receipt Image",
+    "description": "Foto struk. Butuh header `Authorization: Bearer <token>`.",
+    "operationId": "get_receipt_image_api_v1_receipts__receipt_id__image_get",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "receipt_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Receipt Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "image/jpeg": {}
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/dashboard": {
+   "get": {
+    "tags": [
+     "Dashboard & Analitik"
+    ],
+    "summary": "Get Dashboard",
+    "description": "Semua data layar **Beranda** dalam satu panggilan.",
+    "operationId": "get_dashboard_api_v1_dashboard_get",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "month",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Bulan YYYY-MM. Kosong = bulan ini.",
+       "examples": [
+        "2026-10"
+       ],
+       "title": "Month"
+      },
+      "description": "Bulan YYYY-MM. Kosong = bulan ini."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DashboardOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/analytics/categories": {
+   "get": {
+    "tags": [
+     "Dashboard & Analitik"
+    ],
+    "summary": "Category Breakdown",
+    "description": "Data layar **Kategori Pengeluaran**: nominal & persentase per kategori.",
+    "operationId": "category_breakdown_api_v1_analytics_categories_get",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "month",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Bulan YYYY-MM. Kosong = bulan ini.",
+       "examples": [
+        "2026-10"
+       ],
+       "title": "Month"
+      },
+      "description": "Bulan YYYY-MM. Kosong = bulan ini."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CategoryBreakdownOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/v1/analytics/monthly": {
+   "get": {
+    "tags": [
+     "Dashboard & Analitik"
+    ],
+    "summary": "Monthly Trend",
+    "description": "Tren total pengeluaran per bulan (untuk grafik).",
+    "operationId": "monthly_trend_api_v1_analytics_monthly_get",
+    "security": [
+     {
+      "OAuth2PasswordBearer": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "month",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Bulan terakhir (YYYY-MM). Kosong = bulan ini.",
+       "title": "Month"
+      },
+      "description": "Bulan terakhir (YYYY-MM). Kosong = bulan ini."
+     },
+     {
+      "name": "months",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 24,
+       "minimum": 1,
+       "description": "Jumlah bulan ke belakang",
+       "default": 6,
+       "title": "Months"
+      },
+      "description": "Jumlah bulan ke belakang"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/MonthlyPointOut"
+         },
+         "title": "Response Monthly Trend Api V1 Analytics Monthly Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "Body_login_form_api_v1_auth_token_post": {
+    "properties": {
+     "grant_type": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^password$"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Grant Type"
+     },
+     "username": {
+      "type": "string",
+      "title": "Username"
+     },
+     "password": {
+      "type": "string",
+      "format": "password",
+      "title": "Password"
+     },
+     "scope": {
+      "type": "string",
+      "title": "Scope",
+      "default": ""
+     },
+     "client_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Client Id"
+     },
+     "client_secret": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "format": "password",
+      "title": "Client Secret"
+     }
+    },
+    "type": "object",
+    "required": [
+     "username",
+     "password"
+    ],
+    "title": "Body_login_form_api_v1_auth_token_post"
+   },
+   "Body_scan_receipt_api_v1_scans_post": {
+    "properties": {
+     "file": {
+      "type": "string",
+      "format": "binary",
+      "title": "File",
+      "description": "Foto struk (JPG/PNG/WEBP)"
+     }
+    },
+    "type": "object",
+    "required": [
+     "file"
+    ],
+    "title": "Body_scan_receipt_api_v1_scans_post"
+   },
+   "CategoryBreakdownOut": {
+    "properties": {
+     "month": {
+      "type": "string",
+      "title": "Month",
+      "examples": [
+       "2026-10"
+      ]
+     },
+     "month_label": {
+      "type": "string",
+      "title": "Month Label",
+      "examples": [
+       "Oktober 2026"
+      ]
+     },
+     "total_amount": {
+      "type": "number",
+      "title": "Total Amount",
+      "description": "Jumlah harga semua barang bulan itu"
+     },
+     "categories": {
+      "items": {
+       "$ref": "#/components/schemas/CategorySpendingOut-Output"
+      },
+      "type": "array",
+      "title": "Categories"
+     }
+    },
+    "type": "object",
+    "required": [
+     "month",
+     "month_label",
+     "total_amount",
+     "categories"
+    ],
+    "title": "CategoryBreakdownOut"
+   },
+   "CategoryBrief-Input": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "key": {
+      "type": "string",
+      "title": "Key",
+      "description": "Label kategori di model ML, mis. Kebutuhan_Rumah_Tangga"
+     },
+     "label": {
+      "type": "string",
+      "title": "Label",
+      "description": "Nama tampilan, mis. Kebutuhan Rumah Tangga"
+     },
+     "icon": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Icon",
+      "description": "Nama Material Icon untuk Flutter"
+     },
+     "color": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Color",
+      "description": "Warna hex, mis. #2563EB"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "key",
+     "label"
+    ],
+    "title": "CategoryBrief"
+   },
+   "CategoryBrief-Output": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "key": {
+      "type": "string",
+      "title": "Key",
+      "description": "Label kategori di model ML, mis. Kebutuhan_Rumah_Tangga"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name",
+      "description": "Nama tampilan, mis. Kebutuhan Rumah Tangga"
+     },
+     "icon": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Icon",
+      "description": "Nama Material Icon untuk Flutter"
+     },
+     "color": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Color",
+      "description": "Warna hex, mis. #2563EB"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "key",
+     "name"
+    ],
+    "title": "CategoryBrief"
+   },
+   "CategoryOut-Input": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "key": {
+      "type": "string",
+      "title": "Key",
+      "description": "Label kategori di model ML, mis. Kebutuhan_Rumah_Tangga"
+     },
+     "label": {
+      "type": "string",
+      "title": "Label",
+      "description": "Nama tampilan, mis. Kebutuhan Rumah Tangga"
+     },
+     "icon": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Icon",
+      "description": "Nama Material Icon untuk Flutter"
+     },
+     "color": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Color",
+      "description": "Warna hex, mis. #2563EB"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Description"
+     },
+     "sort_order": {
+      "type": "integer",
+      "title": "Sort Order",
+      "default": 0
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "key",
+     "label"
+    ],
+    "title": "CategoryOut"
+   },
+   "CategoryOut-Output": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "key": {
+      "type": "string",
+      "title": "Key",
+      "description": "Label kategori di model ML, mis. Kebutuhan_Rumah_Tangga"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name",
+      "description": "Nama tampilan, mis. Kebutuhan Rumah Tangga"
+     },
+     "icon": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Icon",
+      "description": "Nama Material Icon untuk Flutter"
+     },
+     "color": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Color",
+      "description": "Warna hex, mis. #2563EB"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Description"
+     },
+     "sort_order": {
+      "type": "integer",
+      "title": "Sort Order",
+      "default": 0
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "key",
+     "name"
+    ],
+    "title": "CategoryOut"
+   },
+   "CategorySpendingOut-Input": {
+    "properties": {
+     "category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Input"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "null = barang tanpa kategori"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Description"
+     },
+     "amount": {
+      "type": "number",
+      "title": "Amount"
+     },
+     "percentage": {
+      "type": "number",
+      "title": "Percentage",
+      "description": "Persentase terhadap total barang bulan itu (0-100)"
+     },
+     "item_count": {
+      "type": "integer",
+      "title": "Item Count"
+     }
+    },
+    "type": "object",
+    "required": [
+     "category",
+     "amount",
+     "percentage",
+     "item_count"
+    ],
+    "title": "CategorySpendingOut"
+   },
+   "CategorySpendingOut-Output": {
+    "properties": {
+     "category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Output"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "null = barang tanpa kategori"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Description"
+     },
+     "amount": {
+      "type": "number",
+      "title": "Amount"
+     },
+     "percentage": {
+      "type": "number",
+      "title": "Percentage",
+      "description": "Persentase terhadap total barang bulan itu (0-100)"
+     },
+     "item_count": {
+      "type": "integer",
+      "title": "Item Count"
+     }
+    },
+    "type": "object",
+    "required": [
+     "category",
+     "amount",
+     "percentage",
+     "item_count"
+    ],
+    "title": "CategorySpendingOut"
+   },
+   "ClassifyItemOut-Input": {
+    "properties": {
+     "category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Category Id"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Input"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "confidence_score": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Score",
+      "description": "0..1"
+     },
+     "confidence_percent": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Percent",
+      "description": "0..100, siap ditampilkan"
+     },
+     "prediction_source": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Prediction Source",
+      "description": "user_history | keyword_rules | ml_model"
+     },
+     "needs_review": {
+      "type": "boolean",
+      "title": "Needs Review",
+      "description": "true = tandai kuning 'Periksa' di layar koreksi"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     }
+    },
+    "type": "object",
+    "required": [
+     "needs_review",
+     "text"
+    ],
+    "title": "ClassifyItemOut"
+   },
+   "ClassifyItemOut-Output": {
+    "properties": {
+     "category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Category Id"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Output"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "confidence_score": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Score",
+      "description": "0..1"
+     },
+     "confidence_percent": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Percent",
+      "description": "0..100, siap ditampilkan"
+     },
+     "prediction_source": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Prediction Source",
+      "description": "user_history | keyword_rules | ml_model"
+     },
+     "needs_review": {
+      "type": "boolean",
+      "title": "Needs Review",
+      "description": "true = tandai kuning 'Periksa' di layar koreksi"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     }
+    },
+    "type": "object",
+    "required": [
+     "needs_review",
+     "text"
+    ],
+    "title": "ClassifyItemOut"
+   },
+   "ClassifyRequest": {
+    "properties": {
+     "texts": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Texts",
+      "examples": [
+       [
+        "SUSU UHT 1L",
+        "RINSO 800G"
+       ]
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "texts"
+    ],
+    "title": "ClassifyRequest"
+   },
+   "DashboardOut": {
+    "properties": {
+     "month": {
+      "type": "string",
+      "title": "Month"
+     },
+     "month_label": {
+      "type": "string",
+      "title": "Month Label"
+     },
+     "total_spent": {
+      "type": "number",
+      "title": "Total Spent",
+      "description": "Total pengeluaran (jumlah total_amount struk)"
+     },
+     "receipt_count": {
+      "type": "integer",
+      "title": "Receipt Count"
+     },
+     "item_count": {
+      "type": "integer",
+      "title": "Item Count"
+     },
+     "previous_month_total": {
+      "type": "number",
+      "title": "Previous Month Total"
+     },
+     "change_percent": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Change Percent",
+      "description": "Perubahan vs bulan lalu, null jika bulan lalu 0"
+     },
+     "categories": {
+      "items": {
+       "$ref": "#/components/schemas/CategorySpendingOut-Output"
+      },
+      "type": "array",
+      "title": "Categories"
+     },
+     "recent_receipts": {
+      "items": {
+       "$ref": "#/components/schemas/ReceiptSummaryOut-Output"
+      },
+      "type": "array",
+      "title": "Recent Receipts"
+     }
+    },
+    "type": "object",
+    "required": [
+     "month",
+     "month_label",
+     "total_spent",
+     "receipt_count",
+     "item_count",
+     "previous_month_total",
+     "change_percent",
+     "categories",
+     "recent_receipts"
+    ],
+    "title": "DashboardOut"
+   },
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "title": "HTTPValidationError"
+   },
+   "LoginRequest": {
+    "properties": {
+     "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email",
+      "examples": [
+       "reza@gmail.com"
+      ]
+     },
+     "password": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Password",
+      "examples": [
+       "rahasia123"
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "email",
+     "password"
+    ],
+    "title": "LoginRequest"
+   },
+   "MessageOut": {
+    "properties": {
+     "message": {
+      "type": "string",
+      "title": "Message"
+     }
+    },
+    "type": "object",
+    "required": [
+     "message"
+    ],
+    "title": "MessageOut"
+   },
+   "MonthlyPointOut": {
+    "properties": {
+     "month": {
+      "type": "string",
+      "title": "Month"
+     },
+     "month_label": {
+      "type": "string",
+      "title": "Month Label"
+     },
+     "total_spent": {
+      "type": "number",
+      "title": "Total Spent"
+     },
+     "receipt_count": {
+      "type": "integer",
+      "title": "Receipt Count"
+     }
+    },
+    "type": "object",
+    "required": [
+     "month",
+     "month_label",
+     "total_spent",
+     "receipt_count"
+    ],
+    "title": "MonthlyPointOut"
+   },
+   "Page_ReceiptSummaryOut_": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/ReceiptSummaryOut-Output"
+      },
+      "type": "array",
+      "title": "Items"
+     },
+     "total": {
+      "type": "integer",
+      "title": "Total"
+     },
+     "page": {
+      "type": "integer",
+      "title": "Page"
+     },
+     "page_size": {
+      "type": "integer",
+      "title": "Page Size"
+     },
+     "pages": {
+      "type": "integer",
+      "title": "Pages"
+     }
+    },
+    "type": "object",
+    "required": [
+     "items",
+     "total",
+     "page",
+     "page_size",
+     "pages"
+    ],
+    "title": "Page[ReceiptSummaryOut]"
+   },
+   "PasswordChange": {
+    "properties": {
+     "current_password": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Current Password"
+     },
+     "new_password": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 8,
+      "title": "New Password"
+     }
+    },
+    "type": "object",
+    "required": [
+     "current_password",
+     "new_password"
+    ],
+    "title": "PasswordChange"
+   },
+   "ReceiptCreate": {
+    "properties": {
+     "merchant_name": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 200
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Merchant Name",
+      "examples": [
+       "INDOMARET"
+      ]
+     },
+     "transaction_date": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Transaction Date",
+      "description": "Kosong = waktu sekarang",
+      "examples": [
+       "2026-10-21T14:30:00"
+      ]
+     },
+     "total_amount": {
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Amount",
+      "description": "Kosong = jumlah harga semua barang"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/ReceiptItemIn"
+      },
+      "type": "array",
+      "minItems": 1,
+      "title": "Items"
+     },
+     "scan_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Scan Id",
+      "description": "scan_id dari POST /scans agar foto ikut tersimpan"
+     },
+     "raw_text": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Raw Text",
+      "description": "Teks OCR (opsional, untuk evaluasi)"
+     }
+    },
+    "type": "object",
+    "required": [
+     "items"
+    ],
+    "title": "ReceiptCreate"
+   },
+   "ReceiptItemIn": {
+    "properties": {
+     "item_name": {
+      "type": "string",
+      "maxLength": 255,
+      "minLength": 1,
+      "title": "Item Name",
+      "examples": [
+       "ROTI TAWAR 500G"
+      ]
+     },
+     "quantity": {
+      "type": "integer",
+      "maximum": 9999.0,
+      "minimum": 1.0,
+      "title": "Quantity",
+      "default": 1
+     },
+     "item_price": {
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Item Price",
+      "description": "Harga total baris (qty x satuan)"
+     },
+     "category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Category Id",
+      "description": "Kategori final pilihan pengguna"
+     },
+     "predicted_category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Predicted Category Id",
+      "description": "Kategori hasil scan (salin dari respons /scans)"
+     },
+     "confidence_score": {
+      "anyOf": [
+       {
+        "type": "number",
+        "maximum": 1.0,
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Score"
+     },
+     "prediction_source": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 30
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Prediction Source"
+     },
+     "is_user_corrected": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Is User Corrected",
+      "description": "Kosongkan agar dihitung otomatis: true jika category_id berbeda dari predicted_category_id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "item_name"
+    ],
+    "title": "ReceiptItemIn"
+   },
+   "ReceiptItemOut-Input": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "item_name": {
+      "type": "string",
+      "title": "Item Name"
+     },
+     "quantity": {
+      "type": "integer",
+      "title": "Quantity",
+      "default": 1
+     },
+     "item_price": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Item Price"
+     },
+     "category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Category Id"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Input"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "predicted_category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Predicted Category Id"
+     },
+     "prediction_source": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Prediction Source"
+     },
+     "confidence_score": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Score"
+     },
+     "is_user_corrected": {
+      "type": "boolean",
+      "title": "Is User Corrected",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "item_name"
+    ],
+    "title": "ReceiptItemOut"
+   },
+   "ReceiptItemOut-Output": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "item_name": {
+      "type": "string",
+      "title": "Item Name"
+     },
+     "quantity": {
+      "type": "integer",
+      "title": "Quantity",
+      "default": 1
+     },
+     "item_price": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Item Price"
+     },
+     "category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Category Id"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Output"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "predicted_category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Predicted Category Id"
+     },
+     "prediction_source": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Prediction Source"
+     },
+     "confidence_score": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Score"
+     },
+     "is_user_corrected": {
+      "type": "boolean",
+      "title": "Is User Corrected",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "item_name"
+    ],
+    "title": "ReceiptItemOut"
+   },
+   "ReceiptItemUpdate": {
+    "properties": {
+     "item_name": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 255,
+        "minLength": 1
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Item Name"
+     },
+     "quantity": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 9999.0,
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Quantity"
+     },
+     "item_price": {
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Item Price"
+     },
+     "category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Category Id"
+     }
+    },
+    "type": "object",
+    "title": "ReceiptItemUpdate"
+   },
+   "ReceiptOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "merchant_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Merchant Name"
+     },
+     "transaction_date": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Transaction Date"
+     },
+     "total_amount": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Amount"
+     },
+     "item_count": {
+      "type": "integer",
+      "title": "Item Count"
+     },
+     "image_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Image Url",
+      "description": "Path gambar (butuh header Authorization)"
+     },
+     "main_category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Output"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Kategori dengan nominal terbesar di struk ini"
+     },
+     "created_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Created At"
+     },
+     "items_total": {
+      "type": "number",
+      "title": "Items Total"
+     },
+     "updated_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Updated At"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/ReceiptItemOut-Output"
+      },
+      "type": "array",
+      "title": "Items"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "merchant_name",
+     "transaction_date",
+     "total_amount",
+     "item_count",
+     "image_url",
+     "created_at",
+     "items_total",
+     "items"
+    ],
+    "title": "ReceiptOut"
+   },
+   "ReceiptSummaryOut-Input": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "merchant_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Merchant Name"
+     },
+     "transaction_date": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Transaction Date"
+     },
+     "total_amount": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Amount"
+     },
+     "item_count": {
+      "type": "integer",
+      "title": "Item Count"
+     },
+     "image_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Image Url",
+      "description": "Path gambar (butuh header Authorization)"
+     },
+     "main_category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Input"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Kategori dengan nominal terbesar di struk ini"
+     },
+     "created_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "merchant_name",
+     "transaction_date",
+     "total_amount",
+     "item_count",
+     "image_url",
+     "created_at"
+    ],
+    "title": "ReceiptSummaryOut"
+   },
+   "ReceiptSummaryOut-Output": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "merchant_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Merchant Name"
+     },
+     "transaction_date": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Transaction Date"
+     },
+     "total_amount": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Amount"
+     },
+     "item_count": {
+      "type": "integer",
+      "title": "Item Count"
+     },
+     "image_url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Image Url",
+      "description": "Path gambar (butuh header Authorization)"
+     },
+     "main_category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Output"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Kategori dengan nominal terbesar di struk ini"
+     },
+     "created_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "merchant_name",
+     "transaction_date",
+     "total_amount",
+     "item_count",
+     "image_url",
+     "created_at"
+    ],
+    "title": "ReceiptSummaryOut"
+   },
+   "ReceiptUpdate": {
+    "properties": {
+     "merchant_name": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 200
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Merchant Name",
+      "examples": [
+       "INDOMARET"
+      ]
+     },
+     "transaction_date": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Transaction Date",
+      "description": "Kosong = waktu sekarang",
+      "examples": [
+       "2026-10-21T14:30:00"
+      ]
+     },
+     "total_amount": {
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Amount",
+      "description": "Kosong = jumlah harga semua barang"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/ReceiptItemIn"
+      },
+      "type": "array",
+      "minItems": 1,
+      "title": "Items"
+     }
+    },
+    "type": "object",
+    "required": [
+     "items"
+    ],
+    "title": "ReceiptUpdate",
+    "description": "Mengganti seluruh isi struk (header + daftar barang)."
+   },
+   "RegisterRequest": {
+    "properties": {
+     "full_name": {
+      "type": "string",
+      "maxLength": 150,
+      "minLength": 2,
+      "title": "Full Name",
+      "examples": [
+       "Reza"
+      ]
+     },
+     "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email",
+      "examples": [
+       "reza@gmail.com"
+      ]
+     },
+     "password": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 8,
+      "title": "Password",
+      "examples": [
+       "rahasia123"
+      ]
+     },
+     "password_confirmation": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Password Confirmation",
+      "description": "Opsional. Jika dikirim harus sama dengan password."
+     }
+    },
+    "type": "object",
+    "required": [
+     "full_name",
+     "email",
+     "password"
+    ],
+    "title": "RegisterRequest"
+   },
+   "ScanItemOut-Input": {
+    "properties": {
+     "category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Category Id"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Input"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "confidence_score": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Score",
+      "description": "0..1"
+     },
+     "confidence_percent": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Percent",
+      "description": "0..100, siap ditampilkan"
+     },
+     "prediction_source": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Prediction Source",
+      "description": "user_history | keyword_rules | ml_model"
+     },
+     "needs_review": {
+      "type": "boolean",
+      "title": "Needs Review",
+      "description": "true = tandai kuning 'Periksa' di layar koreksi"
+     },
+     "index": {
+      "type": "integer",
+      "title": "Index"
+     },
+     "item_name": {
+      "type": "string",
+      "title": "Item Name"
+     },
+     "quantity": {
+      "type": "integer",
+      "title": "Quantity",
+      "default": 1
+     },
+     "unit_price": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Unit Price"
+     },
+     "item_price": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Item Price"
+     },
+     "predicted_category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Predicted Category Id",
+      "description": "Kirim balik saat menyimpan agar koreksi pengguna tercatat"
+     }
+    },
+    "type": "object",
+    "required": [
+     "needs_review",
+     "index",
+     "item_name"
+    ],
+    "title": "ScanItemOut"
+   },
+   "ScanItemOut-Output": {
+    "properties": {
+     "category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Category Id"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CategoryBrief-Output"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "confidence_score": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Score",
+      "description": "0..1"
+     },
+     "confidence_percent": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence Percent",
+      "description": "0..100, siap ditampilkan"
+     },
+     "prediction_source": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Prediction Source",
+      "description": "user_history | keyword_rules | ml_model"
+     },
+     "needs_review": {
+      "type": "boolean",
+      "title": "Needs Review",
+      "description": "true = tandai kuning 'Periksa' di layar koreksi"
+     },
+     "index": {
+      "type": "integer",
+      "title": "Index"
+     },
+     "item_name": {
+      "type": "string",
+      "title": "Item Name"
+     },
+     "quantity": {
+      "type": "integer",
+      "title": "Quantity",
+      "default": 1
+     },
+     "unit_price": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Unit Price"
+     },
+     "item_price": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Item Price"
+     },
+     "predicted_category_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Predicted Category Id",
+      "description": "Kirim balik saat menyimpan agar koreksi pengguna tercatat"
+     }
+    },
+    "type": "object",
+    "required": [
+     "needs_review",
+     "index",
+     "item_name"
+    ],
+    "title": "ScanItemOut"
+   },
+   "ScanOut": {
+    "properties": {
+     "scan_id": {
+      "type": "string",
+      "title": "Scan Id",
+      "description": "Kirim di POST /receipts agar foto ikut tersimpan"
+     },
+     "image_url": {
+      "type": "string",
+      "title": "Image Url"
+     },
+     "merchant_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Merchant Name"
+     },
+     "transaction_date": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Transaction Date"
+     },
+     "total_amount": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Amount"
+     },
+     "items_total": {
+      "type": "number",
+      "title": "Items Total"
+     },
+     "total_matches": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Matches",
+      "description": "Apakah total struk sama dengan jumlah harga barang (null jika total tak terbaca)"
+     },
+     "review_count": {
+      "type": "integer",
+      "title": "Review Count",
+      "description": "Jumlah barang yang perlu diperiksa pengguna"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/ScanItemOut-Output"
+      },
+      "type": "array",
+      "title": "Items"
+     },
+     "warnings": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Warnings"
+     },
+     "raw_text": {
+      "type": "string",
+      "title": "Raw Text"
+     }
+    },
+    "type": "object",
+    "required": [
+     "scan_id",
+     "image_url",
+     "items_total",
+     "total_matches",
+     "review_count",
+     "items",
+     "warnings",
+     "raw_text"
+    ],
+    "title": "ScanOut"
+   },
+   "TokenOut": {
+    "properties": {
+     "access_token": {
+      "type": "string",
+      "title": "Access Token"
+     },
+     "token_type": {
+      "type": "string",
+      "title": "Token Type",
+      "default": "bearer"
+     },
+     "expires_in": {
+      "type": "integer",
+      "title": "Expires In"
+     },
+     "user": {
+      "$ref": "#/components/schemas/UserOut"
+     }
+    },
+    "type": "object",
+    "required": [
+     "access_token",
+     "expires_in",
+     "user"
+    ],
+    "title": "TokenOut"
+   },
+   "UserOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "email": {
+      "type": "string",
+      "title": "Email"
+     },
+     "full_name": {
+      "type": "string",
+      "title": "Full Name"
+     },
+     "created_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date-time"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "email",
+     "full_name"
+    ],
+    "title": "UserOut"
+   },
+   "UserUpdate": {
+    "properties": {
+     "full_name": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 150,
+        "minLength": 2
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Full Name"
+     },
+     "email": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "email"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Email"
+     }
+    },
+    "type": "object",
+    "title": "UserUpdate"
+   },
+   "ValidationError": {
+    "properties": {
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Location"
+     },
+     "msg": {
+      "type": "string",
+      "title": "Message"
+     },
+     "type": {
+      "type": "string",
+      "title": "Error Type"
+     }
+    },
+    "type": "object",
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError"
+   }
+  },
+  "securitySchemes": {
+   "OAuth2PasswordBearer": {
+    "type": "oauth2",
+    "flows": {
+     "password": {
+      "scopes": {},
+      "tokenUrl": "/api/v1/auth/token"
+     }
+    }
+   }
+  }
+ }
+}
